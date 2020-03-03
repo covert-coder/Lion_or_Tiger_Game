@@ -6,6 +6,8 @@ import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
     enum Player{
         ONE,TWO
     }
+    private Button btnReStart;
+    private GridLayout mGridLayout;
+
     // Player.ONE = tiger, Player.TWO = lion
     Player currentPlayer = Player.ONE;  // sets the currentPlayer as player one at game start
     int activePlayer = 0; // this integer is for player one
@@ -42,6 +47,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        btnReStart = findViewById(R.id.btnRestart);
+        mGridLayout = findViewById(R.id.gridLayout);
+        btnReStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reStartGame();
+            }
+        });
     }
     public void imageViewIsTapped(View tappedImageView){
         ImageView tappedView = (ImageView) tappedImageView;
@@ -50,14 +63,21 @@ public class MainActivity extends AppCompatActivity {
         // and the return is stored in the variable tappedView of class ImageView
         // this is downcasting (see notes, lecture 73)
         int tappedCounter = Integer.parseInt(tappedView.getTag().toString());
-        // code above stores the tag for each image view in the grid in a variable of type int
-        // called tappedCounter.  It is later used as the index number for the gameState array (line 22)
+        Log.i("myTag", "tappedCounter = "+tappedCounter);
+        // code above stores the tag, converte to a string converted to an integer, for each image view in
+        // the grid in a variable of type int called tappedCounter.  It is later used as the index
+        // number for the gameState array (line 26).  If the square is unplayed its value will be 2
+        // and, if the square is played
 
         //tappedView.setTranslationX(-500);
         // we will now create an if stmt to have a tiger drawn if it is player one
         // and to have a lion, if it is player 2.
+
         if (gameState[tappedCounter] == 2  && gameIsActive) {
             // if gameState[tappedCounter]==2 then the square has not yet been played(see line 26)
+            // and all of the following code can be considered down to the else stmt, line 109
+            // if the square has already been tapped, tapped counter = 0 (tiger) or 1 (lion) & code
+            // is consequently skipped
             gameState[tappedCounter] = activePlayer;//if tapped by player 1 it is now 0, plyr 2 = 1
             Log.i("myTag","gameState[tappedCounter] value = "+gameState[tappedCounter]);
             tappedImageView.setTranslationX(-1000);
@@ -67,13 +87,14 @@ public class MainActivity extends AppCompatActivity {
                 currentPlayer = Player.TWO;
                 activePlayer = 1;
 
-            }else if(currentPlayer==Player.TWO){
+            }
+            else if(currentPlayer==Player.TWO){
 
                 tappedView.setImageResource(R.drawable.lion);
                 tappedView.animate().translationXBy(1000).rotation(-1080).setDuration(1000);
                 currentPlayer=Player.ONE;
                 activePlayer = 0;
-                }
+            }
             //checking for the winner
             // the colon between winningPosition and winningPositions means "set"
             // iteratively, winningPosition is given each of the sets in winningPositions, one by one
@@ -90,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
                     String winner = "Lion"; // setting this as the default state
                     // but if the actual results show otherwise because player 0 is in the game state zeroth
                     // element of any of the combinations
+                    btnReStart.setVisibility(View.VISIBLE);
                     if (gameState[winningPosition[0]] == 0){ // it is only zero when plyr 1 (tiger)
                                                             // is the plyr that has filled the whole array
                                     // no need to check if all other elements in that array are plyr one tigers
@@ -101,29 +123,53 @@ public class MainActivity extends AppCompatActivity {
                     // LinearLayout layout = (LinearLayout)findViewById(R.id.playAgainLayout);
                     // layout.setVisibility(View.VISIBLE);
 
-                } else {
+                }
+                else {
                     // if no one has one yet then,
                     boolean gameIsOver = true;
                     for (int counterState : gameState ) { //this sets counterState to each of the values
                                                         // in gameState, one after the other (iteration)
-                        // see this link on the web; https://stackoverflow.com/questions/2399590/what-does-the-colon-operator-do
-                        // if any one of the grids has not been clicked
-                        // it is checking to see if game play is still possible
+                        // some of those values may be 0 (tiger), some 1 (lion) and the rest 2 (unplayed)
+                        // see this link on the web; https://stackoverflow.com/questions/2399590/
+                        // what-does-the-colon-operator-do
+                        // it is checking to see if game play is still possible (one or more 2's remaining)
 
                         if (counterState == 2) {
                             gameIsOver = false; // and game play should continue
+                        }
                     }
-                  }
                     // if gameIsOver is true, on the other hand.. and no squares are left to click.
                     if (gameIsOver) {
                         TextView winnerMsg = (TextView) findViewById(R.id.winnerMsg);
                         winnerMsg.setText("It is a DRAW!");
+                        btnReStart.setVisibility(View.VISIBLE);
+
                         //LinearLayout layout = (LinearLayout)findViewById(R.id.playAgainLayout);
                         //layout.setVisibility(View.VISIBLE);
                     }
                 }
             }
         }
+    }
+    // reStart game function
+    private void reStartGame(){
+        currentPlayer = Player.ONE;  // sets the currentPlayer as player one at game start
+        int activePlayer = 0; // this integer is for player one
+        boolean gameIsActive = true;
+        // value of 2 in gameState index signifies un-played and available for play as the starting state;
+        int[] gameState = {2, 2, 2, 2, 2, 2, 2, 2, 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
+        Log.i("myTag", "play again was pressed");
+        // we create an integer called index with a value of zero
+        // we terminate when that integer reaches 25 (number of views in grid)
+        // we increment the index by 1 each time the for loop loops
+        for (int index = 0; index < mGridLayout.getChildCount(); index++){
+            // now we access our imageViews, one by one
+            // we create a new variable of type ImageView called gridView
+            // we assign it the value of cast(ImageView) containing the view of the child in mGridLayout
+            // with the index number incremented
+            ImageView gridView = (ImageView) mGridLayout.getChildAt(index);
+        }
+
     }
 }
 

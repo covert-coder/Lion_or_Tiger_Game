@@ -7,12 +7,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.GridLayout;
+import androidx.gridlayout.widget.GridLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.IdentityHashMap;
 
 public class MainActivity extends AppCompatActivity {
     // we will create an enum for a new type of variable called player and give it two possible values
@@ -48,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         btnReStart = findViewById(R.id.btnRestart);
+       // mGridLayout = findViewById(R.id.gridLayout);
         mGridLayout = findViewById(R.id.gridLayout);
+
         btnReStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,12 +56,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    // this is an onClick method
     public void imageViewIsTapped(View tappedImageView){
         ImageView tappedView = (ImageView) tappedImageView;
         // the View obtained from the onClick method imageViewIsTapped
         // is downcast to (ImageView) the subclass. That ImageView is labelled tappedImageView
         // and the return is stored in the variable tappedView of class ImageView
         // this is downcasting (see notes, lecture 73)
+
         int tappedCounter = Integer.parseInt(tappedView.getTag().toString());
         Log.i("myTag", "tappedCounter = "+tappedCounter);
         // code above stores the tag, converte to a string converted to an integer, for each image view in
@@ -69,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
         // number for the gameState array (line 26).  If the square is unplayed its value will be 2
         // and, if the square is played
 
-        //tappedView.setTranslationX(-500);
         // we will now create an if stmt to have a tiger drawn if it is player one
         // and to have a lion, if it is player 2.
 
@@ -153,11 +154,7 @@ public class MainActivity extends AppCompatActivity {
     }
     // reStart game function
     private void reStartGame(){
-        currentPlayer = Player.ONE;  // sets the currentPlayer as player one at game start
-        int activePlayer = 0; // this integer is for player one
-        boolean gameIsActive = true;
-        // value of 2 in gameState index signifies un-played and available for play as the starting state;
-        int[] gameState = {2, 2, 2, 2, 2, 2, 2, 2, 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
+
         Log.i("myTag", "play again was pressed");
         // we create an integer called index with a value of zero
         // we terminate when that integer reaches 25 (number of views in grid)
@@ -168,8 +165,18 @@ public class MainActivity extends AppCompatActivity {
             // we assign it the value of cast(ImageView) containing the view of the child in mGridLayout
             // with the index number incremented
             ImageView gridView = (ImageView) mGridLayout.getChildAt(index);
-        }
+            // now we set the ImageView gridView to the image for playable squares, blank2
+            gridView.setImageResource(R.drawable.blank2);
 
+        }
+        // value of 2 in gameState index signifies un-played and available for play as the starting state;
+        btnReStart.setVisibility(View.GONE);
+        gameState = new int[]{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}; // 25 grid panels
+        gameIsActive = true;
+        activePlayer = 0; // this integer is for player one
+        currentPlayer = Player.ONE;  // sets the currentPlayer as player one at game start
+        TextView winnerMsg = (TextView) findViewById(R.id.winnerMsg);
+        winnerMsg.setText(null);
     }
 }
 
